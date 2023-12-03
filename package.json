@@ -25,7 +25,27 @@
         "command": "kill-console-log.eradicate",
         "title": "Eradicate all Console Logs"
       }
-    ]
+    ],
+    "keybindings": [
+      {
+          "command": "kill-console-log.kill",
+          "key": "ctrl+alt+shift+l",
+          "mac": "cmd+alt+shift+l",
+          "when": "editorTextFocus"
+      },
+      {
+          "command": "kill-console-log.decimate",
+          "key": "ctrl+alt+shift+g",
+          "mac": "cmd+alt+shift+g",
+          "when": "editorTextFocus"
+      },
+      {
+          "command": "kill-console-log.eradicate",
+          "key": "ctrl+alt+shift+p",
+          "mac": "cmd+alt+shift+p",
+          "when": "editorTextFocus"
+      }
+  ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

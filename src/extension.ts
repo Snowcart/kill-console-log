@@ -1,21 +1,9 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import acorn from "acorn";
-import walk from "acorn-walk";
-import simpleGit from "simple-git";
 import { killConsoleLogsInFile, killConsoleLogsInFileInPath } from "./consoleKiller";
-import { getDocument, getModifiedFiles } from "./fileHelper";
-import fs from "fs";
+import { getDocument, getModifiedFiles, getProjectFiles } from "./fileHelper";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log(
-    'Congratulations, your extension "kill-console-log" is now active!'
-  );
 
   const killCommand = vscode.commands.registerCommand(
     "kill-console-log.kill",
@@ -27,11 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
   const eradicate = vscode.commands.registerCommand(
     "kill-console-log.eradicate",
-    () => {
-      vscode.window.showInformationMessage(
-        "Eradicated all Console Logs in the workspace"
-      );
-    }
+    killAll
   );
 
   context.subscriptions.push(killCommand, decimate, eradicate);
@@ -56,8 +40,56 @@ const kill = () => {
 const killAllGit = async () => {
   const files = await getModifiedFiles();
 
-  files.forEach((file) => {
-    killConsoleLogsInFileInPath(file);
-  }); 
+  await vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: "Eliminating console logs in Git changes...",
+    cancellable: true
+  }, async (progress, token) => {
+    const totalFiles = files.length;
+    for (let i = 0; i < totalFiles; i++) {
+      const file = files[i];
+
+      // Check for cancellation
+      if (token.isCancellationRequested) {
+        break;
+      }
+
+      progress.report({ 
+        message: `Processing file ${i + 1} of ${totalFiles}`,
+        increment: (i + 1) / totalFiles * 100
+      });
+
+      await killConsoleLogsInFileInPath(file);
+    }
+  });
+
   vscode.window.showInformationMessage("Eliminated all Console Logs in Git Changes");
+};
+
+const killAll = async () => {
+  const allProjectFiles = await getProjectFiles();
+  await vscode.window.withProgress({
+    location: vscode.ProgressLocation.Notification,
+    title: "Eliminating console logs...",
+    cancellable: true
+  }, async (progress, token) => {
+    const totalFiles = allProjectFiles.length;
+    for (let i = 0; i < totalFiles; i++) {
+      const file = allProjectFiles[i];
+
+      // Check for cancellation
+      if (token.isCancellationRequested) {
+        break;
+      }
+
+      progress.report({ 
+        message: `Processing file ${i + 1} of ${totalFiles}`,
+        increment: (i + 1) / totalFiles * 100
+      });
+
+      await killConsoleLogsInFileInPath(file, true);
+    }
+  });
+
+  vscode.window.showInformationMessage("Eliminated all Console Logs in Project");
 };

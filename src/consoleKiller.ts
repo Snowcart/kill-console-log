@@ -3,55 +3,63 @@ import acorn from "acorn";
 import walk from "acorn-walk";
 import simpleGit from "simple-git";
 import fs from "fs";
+import ts from "typescript";
+import path from "path";
+import { error } from "console";
 
 export const killConsoleLogsInFile = (editor: vscode.TextEditor) => {
-  if (!editor) {
-    vscode.window.showInformationMessage("No active text editor");
-    return; // there is no active text editor.
-  }
-  const document = editor.document;
-  const text = document.getText();
-  const rangesToDelete: vscode.Range[] = [];
-
-  try {
-    const ast = acorn.parse(text, { ecmaVersion: 2020, sourceType: "module" });
-
-    walk.simple(ast, {
-      CallExpression(node: any) {
-        if (
-          node.callee.type === "MemberExpression" &&
-          node.callee.object.name === "console" &&
-          node.callee.property.name === "log"
-        ) {
-          let startPosition = document.positionAt(node.start);
-          let endPosition = document.positionAt(node.end);
-
-          // Check if console.log is the only command on its line
+    if (!editor) {
+      vscode.window.showInformationMessage("No active text editor");
+      return; // there is no active text editor.
+    }
+    const document = editor.document;
+    const text = document.getText();
+    const rangesToDelete: vscode.Range[] = [];
+  
+    // Parse the file using TypeScript
+    const sourceFile = ts.createSourceFile(
+      document.fileName,
+      text,
+      ts.ScriptTarget.Latest,
+      true
+    );
+  
+    const handleNode = (node: ts.Node) => {
+      if (ts.isCallExpression(node)) {
+        const expression = node.expression;
+        if (ts.isPropertyAccessExpression(expression) &&
+            expression.expression.kind === ts.SyntaxKind.Identifier &&
+            (expression.expression as ts.Identifier).text === 'console' &&
+            expression.name.text === 'log') {
+  
+          let start = node.pos;
+          let end = node.end;
+  
+          // Adjust end to include semicolon if present
+          if (text[end] === ";") {
+            end++;
+          }
+  
+          const startPosition = document.positionAt(start);
+          const endPosition = document.positionAt(end);
           const line = document.lineAt(startPosition.line);
-          const lineText = line.text;
-          const lineTrimmed = lineText.trim();
-          let consoleLogText = text.substring(node.start, node.end);
-
-          // Include semicolon if present
-          if (text[node.end] === ";") {
-            consoleLogText += ";";
-            endPosition = document.positionAt(node.end + 1);
+          const lineText = line.text.trim();
+          const consoleLogText = text.substring(start, end).trim();
+  
+          if (lineText === consoleLogText || lineText === consoleLogText + ";") {
+            // Delete the entire line if console.log is the only thing on it (including semicolon)
+            rangesToDelete.push(line.range);
+          } else {
+            // Delete only the console.log part (including semicolon)
+            rangesToDelete.push(new vscode.Range(startPosition, endPosition));
           }
-
-          if (lineTrimmed === consoleLogText) {
-            // Expand range to the entire line, including the line break
-            startPosition = new vscode.Position(startPosition.line, 0);
-            endPosition =
-              startPosition.line < document.lineCount - 1
-                ? document.lineAt(startPosition.line + 1).range.start
-                : new vscode.Position(startPosition.line, lineText.length);
-          }
-
-          rangesToDelete.push(new vscode.Range(startPosition, endPosition));
         }
-      },
-    });
-
+      }
+      ts.forEachChild(node, handleNode);
+    };
+  
+    handleNode(sourceFile);
+  
     if (rangesToDelete.length > 0) {
       editor.edit((editBuilder) => {
         rangesToDelete.forEach((range) => {
@@ -59,69 +67,73 @@ export const killConsoleLogsInFile = (editor: vscode.TextEditor) => {
         });
       });
     }
-  } catch (e: any) {
-    vscode.window.showErrorMessage("Error parsing js file: " + e.message);
-  }
-};
-
-export const killConsoleLogsInFileInPath = (filePath: string): void => {
-    let text = fs.readFileSync(filePath, 'utf8');
-    let modifiedText = text;
-  
-    try {
-      const ast = acorn.parse(text, { ecmaVersion: 2020, sourceType: 'module' }) as acorn.Node;
-  
-      interface Position {
-        start: number;
-        end: number;
-      }
-  
-      const positionsToDelete: Position[] = [];
-  
-      walk.simple(ast, {
-        CallExpression(node: any) {
-          if (
-            node.callee.type === 'MemberExpression' &&
-            node.callee.object.name === 'console' &&
-            node.callee.property.name === 'log'
-          ) {
-            let { start, end } = node;
-  
-            // Include semicolon if present
-            if (text[end] === ';') {
-              end++;
-            }
-  
-            // Check if console.log is the only command on its line
-            const startLine = text.substring(0, start).split('\n').length - 1;
-            const endLine = text.substring(0, end).split('\n').length - 1;
-            const lines = text.split('\n');
-  
-            const lineText = lines[startLine].trim();
-            const consoleLogText = text.substring(start, end).trim();
-  
-            if (lineText === consoleLogText) {
-              // Expand range to the entire line
-              start = text.lastIndexOf('\n', start) + 1;
-              end = endLine < lines.length - 1 ? text.indexOf('\n', end) + 1 : text.length;
-            }
-  
-            positionsToDelete.push({ start, end });
-          }
-        },
-      });
-  
-      // Sort positions in reverse order to avoid offset issues when deleting
-      positionsToDelete.sort((a, b) => b.start - a.start);
-  
-      positionsToDelete.forEach(pos => {
-        // Handling the deletion logic here
-        modifiedText = modifiedText.substring(0, pos.start) + modifiedText.substring(pos.end);
-      });
-  
-      fs.writeFileSync(filePath, modifiedText, 'utf8');
-    } catch (e: any) {
-      console.error('Error parsing js file:', e.message);
-    }
   };
-  
+
+  export const killConsoleLogsInFileInPath = (filePath: string, isFullPath = false): void => {
+    let workspaceFolder;
+    if (vscode.workspace.workspaceFolders) {
+        workspaceFolder = vscode.workspace.workspaceFolders[0].uri.fsPath;
+    } else {
+        console.log('No workspace folders found.');
+        throw new Error("There is no workspace folder");
+    }
+    const fullPath = isFullPath ? filePath : path.join(workspaceFolder, filePath);
+    let text = fs.readFileSync(fullPath, 'utf8');
+
+    // Parse the file using TypeScript
+    const sourceFile = ts.createSourceFile(
+        fullPath,
+        text,
+        ts.ScriptTarget.Latest,
+        true
+    );
+
+    let positionsToDelete: Array<{ start: number; end: number }> = [];
+
+    const handleNode = (node: ts.Node) => {
+        if (ts.isCallExpression(node)) {
+            const expression = node.expression;
+            if (ts.isPropertyAccessExpression(expression) &&
+                expression.expression.kind === ts.SyntaxKind.Identifier &&
+                (expression.expression as ts.Identifier).text === 'console' &&
+                expression.name.text === 'log') {
+
+                let start = node.pos;
+                let end = node.end;
+
+                // Include semicolon if present
+                if (text[end] === ';') {
+                    end++;
+                }
+
+                const startLine = text.substring(0, start).split('\n').length - 1;
+                const lines = text.split('\n');
+                const lineText = lines[startLine].trim();
+                const consoleLogText = text.substring(start, end).trim();
+
+                if (lineText === consoleLogText) {
+                    // Adjust start and end to cover the entire line
+                    start = text.lastIndexOf('\n', start) + 1;
+                    if (startLine < lines.length - 1) {
+                        end = text.indexOf('\n', end);
+                    }
+                }
+
+                positionsToDelete.push({ start, end });
+            }
+        }
+        ts.forEachChild(node, handleNode);
+    };
+
+    handleNode(sourceFile);
+
+    positionsToDelete.sort((a, b) => b.start - a.start);
+
+    let modifiedText = text;
+    positionsToDelete.forEach(pos => {
+        modifiedText = modifiedText.substring(0, pos.start) + modifiedText.substring(pos.end);
+    });
+
+    fs.writeFileSync(fullPath, modifiedText, 'utf8');
+    vscode.window.showInformationMessage("Console logs removed from " + filePath);
+};

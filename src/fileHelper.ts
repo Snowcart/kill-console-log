@@ -58,7 +58,7 @@ const getGitRepoPath= async () => {
 
 const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []) => {
   // Skip node_modules directory
-  if (dirPath.includes('/node_modules/')) {
+  if (dirPath.includes('node_modules')) {
     return arrayOfFiles;
   }
 

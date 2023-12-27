@@ -1,8 +1,9 @@
 {
   "name": "kill-console-log",
   "displayName": "Kill Console Log",
-  "description": "A way to quickly remove all the console logs you made debugging your code.",
-  "version": "0.1.1",
+  "description": "Kill console logs in a single command",
+  "version": "0.1.2",
+  "publisher": "CarterSnowden",
   "repository": {
     "type": "git",
     "url": "https://github.com/Snowcart/kill-console-log"

@@ -26,16 +26,7 @@ export const getModifiedFiles = async () => {
     .map((file) => file.path);
   };
 
-export const getDocument = async (path: string) => {
-  try {
-    const document = await vscode.workspace.openTextDocument(path);
-    return document;
-  } catch (e: any) {
-    vscode.window.showErrorMessage("Error opening file: " + e.message);
-  }
-};
-
-export async function getGitRepoPath() {
+const getGitRepoPath= async () => {
   // Get the current workspace folders
   const workspaceFolders = vscode.workspace.workspaceFolders;
 

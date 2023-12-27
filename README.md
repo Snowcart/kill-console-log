@@ -1,71 +1,48 @@
-# kill-console-log README
+# Kill Console Log
 
-This is the README for your extension "kill-console-log". After writing up a brief description, we recommend including the following sections.
+Hey there, fellow coders! 👋 I'm excited to introduce you to **Kill Console Log** - your new go-to tool for cleaning up those pesky console logs. We've all been there, right? Debugging code and leaving a trail of `console.log` statements behind. Well, it's time to say goodbye to that mess with just a few keystrokes!
+
+## What's This All About?
+
+**Kill Console Log** is a sleek VS Code extension that helps you quickly and efficiently remove all the console logs from your code. Whether it's the current file, the changes in your git repo, or your entire project - we've got you covered!
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Kill Console Logs in Current File**: Got a file littered with logs? We'll clean that up in a jiffy.
+- **Kill Console Logs in Git Changes**: Only want to clean up your current work? No problem!
+- **Eradicate All Console Logs**: Feeling brave? Wipe out every single console log in your project with one bold move.
 
-For example if there is an image subfolder under your extension project workspace:
+## Keybindings
 
-\!\[feature X\]\(images/feature-x.png\)
+We've set up some handy keybindings to make your life even easier. Feel free to customize them to fit your workflow:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+- `Ctrl+Alt+Shift+L` (or `Cmd+Alt+Shift+L` on Mac) for killing logs in the current file.
+- `Ctrl+Alt+Shift+G` (or `Cmd+Alt+Shift+G` on Mac) for eliminating logs in git changes.
+- `Ctrl+Alt+Shift+P` (or `Cmd+Alt+Shift+P` on Mac) for the full eradication.
 
-## Requirements
+## Getting Started
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. **Install the Extension**: Just search for "Kill Console Log" in the VS Code Extensions view and hit install. Easy peasy.
+2. **Use the Commands**: Access our commands through the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`), and start killing those logs.
+3. **Customize Keybindings**: If our defaults don't vibe with you, change them up through VS Code's Keyboard Shortcuts editor.
 
-## Extension Settings
+## Limitations
+Currently, Kill Console Log only supports Javascript. Additionally, as I have made this extension for my own use case, it supports the react-js stack I am using on a regular basis. <br />
+Currently the extension is limited to these file types: `JS, TS, JSX, TSX, HTML`. I am more than happy to add any additional file types to the checker, please just contact me, or make a pull request.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## Contributing
 
-For example:
+Got ideas on how to make this even better? I'm all ears! Feel free to open an issue or submit a pull request. <br />
+[You can check out the repository here](https://github.com/Snowcart/kill-console-log) <br />
+You can also contact me on twitter: [@carterjsnowden](https://twitter.com/carterjsnowden)
 
-This extension contributes the following settings:
+## Future
+There are future plans to also support C# Debug.Logs and its contemporaries. As Microsoft sunsets Visual Studio for Mac, and moves further to use of Visual Studio Code for their C# stack, I believe there will be more of a need for it. Please let me know if this is something you would like to see development on.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+## License
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+This project is licensed under [MIT License](LICENSE) - because keeping things open and easy is how we roll.
 
 ---
 
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Happy coding, and remember: keep your console clean! 😉

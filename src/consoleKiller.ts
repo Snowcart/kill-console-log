@@ -1,11 +1,7 @@
 import * as vscode from "vscode";
-import acorn from "acorn";
-import walk from "acorn-walk";
-import simpleGit from "simple-git";
 import fs from "fs";
 import ts from "typescript";
 import path from "path";
-import { error } from "console";
 
 export const killConsoleLogsInFile = (editor: vscode.TextEditor) => {
     if (!editor) {
@@ -74,7 +70,6 @@ export const killConsoleLogsInFile = (editor: vscode.TextEditor) => {
     if (vscode.workspace.workspaceFolders) {
         workspaceFolder = vscode.workspace.workspaceFolders[0].uri.fsPath;
     } else {
-        console.log('No workspace folders found.');
         throw new Error("There is no workspace folder");
     }
     const fullPath = isFullPath ? filePath : path.join(workspaceFolder, filePath);

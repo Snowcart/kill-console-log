@@ -2,7 +2,7 @@
   "name": "kill-console-log",
   "displayName": "Kill Console Log",
   "description": "Kill console logs in a single command",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "CarterSnowden",
   "repository": {
     "type": "git",
